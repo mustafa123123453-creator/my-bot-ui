@@ -2,23 +2,510 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHLHOM PIANO PRO 🎹</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f0f0f0; }
-        .btn { width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; text-align: center; font-size: 16px; }
-        .blue { background-color: #5bc0de; } /* أزرق */
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --line: #1e1e2e;
+            --white-key: #f0f0f0;
+            --white-key-active: #a8d8ff;
+            --black-key: #1a1a2e;
+            --black-key-active: #4a90d9;
+            --accent: #ffd700;
+            --accent2: #00d4ff;
+            --gradient: linear-gradient(135deg, #ffd700, #ff8c00);
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sparkles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: sparkleFall linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes sparkleFall {
+            0% { transform: translateY(-10vh) scale(1); opacity: 0.8; }
+            100% { transform: translateY(110vh) scale(0.3); opacity: 0; }
+        }
+
+        .container {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 30px;
+            width: 95%;
+            max-width: 1000px;
+            position: relative;
+            z-index: 2;
+            box-shadow: var(--shadow);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            font-size: 50px;
+            animation: logoPulse 2s infinite;
+            display: inline-block;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.05) rotate(5deg); }
+        }
+
+        h1 {
+            font-size: 32px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #000;
+        }
+
+        .btn-gold { background: var(--gradient); }
+        .btn-gold:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); transform: translateY(-2px); }
+        .btn-cyan { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
+        .btn-cyan:hover { box-shadow: 0 0 25px rgba(0, 212, 255, 0.5); transform: translateY(-2px); }
+        .btn-red { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
+        .btn-red:hover { box-shadow: 0 0 25px rgba(255, 68, 68, 0.5); transform: translateY(-2px); }
+        .btn-purple { background: linear-gradient(135deg, #aa44ff, #7700cc); color: #fff; }
+        .btn-purple:hover { box-shadow: 0 0 25px rgba(170, 68, 255, 0.5); transform: translateY(-2px); }
+
+        .piano {
+            position: relative;
+            display: flex;
+            height: 350px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid #333;
+            background: #0a0a0a;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .key {
+            position: relative;
+            flex: 1;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .white-key {
+            background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%);
+            border-right: 1px solid #ccc;
+            z-index: 1;
+        }
+
+        .white-key:hover { background: #e8e8e8; }
+        .white-key.active { background: var(--white-key-active); box-shadow: inset 0 5px 15px rgba(0,0,0,0.2); }
+
+        .black-key {
+            position: absolute;
+            width: 6.5%;
+            height: 55%;
+            background: linear-gradient(to bottom, #333 0%, #111 100%);
+            border-radius: 0 0 6px 6px;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+        }
+
+        .black-key:hover { background: linear-gradient(to bottom, #444 0%, #222 100%); }
+        .black-key.active { background: var(--black-key-active); }
+
+        .key-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .white-key .key-label { color: #666; }
+        .black-key .key-label { color: #aaa; }
+
+        .visualizer {
+            margin-top: 20px;
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            height: 50px;
+        }
+
+        .bar {
+            width: 6px;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: height 0.1s;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .song-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .song-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: #ddd;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .song-btn:hover { border-color: var(--accent); color: var(--accent); }
     </style>
 </head>
 <body>
-    <button class="btn blue" onclick="send('get_id')">🆔 اضغط هنا لمعرفة الـ ID الخاص بك</button>
+    <div class="sparkles" id="sparkles"></div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎹</div>
+            <h1>SHLHOM PIANO PRO</h1>
+            <p class="subtitle">بيانو احترافي - اضغط المفاتيح أو استخدم الكيبورد</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-gold" onclick="toggleRecording()">🔴 تسجيل</button>
+            <button class="btn btn-cyan" onclick="playRecording()">▶️ تشغيل التسجيل</button>
+            <button class="btn btn-red" onclick="clearRecording()">🗑 مسح</button>
+            <button class="btn btn-purple" onclick="toggleSustain()">🎵 Sustain</button>
+        </div>
+
+        <div class="piano" id="piano"></div>
+
+        <div class="visualizer" id="visualizer"></div>
+
+        <div class="status" id="status">جاهز للعزف ✨</div>
+
+        <div class="song-selector" id="songSelector"></div>
+    </div>
+
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        function send(action) {
-            tg.sendData(action);
-            tg.close();
+        const NOTES = [
+            'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2',
+            'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3',
+            'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4',
+            'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5',
+            'C6'
+        ];
+
+        const FREQUENCIES = {
+            'C2': 65.41, 'C#2': 69.30, 'D2': 73.42, 'D#2': 77.78, 'E2': 82.41,
+            'F2': 87.31, 'F#2': 92.50, 'G2': 98.00, 'G#2': 103.83, 'A2': 110.00,
+            'A#2': 116.54, 'B2': 123.47,
+            'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81,
+            'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00,
+            'A#3': 233.08, 'B3': 246.94,
+            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63,
+            'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00,
+            'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25,
+            'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00,
+            'A#5': 932.33, 'B5': 987.77,
+            'C6': 1046.50
+        };
+
+        const KEYBOARD_MAP = {
+            'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3', 'f': 'F3',
+            't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3', 'u': 'A#3', 'j': 'B3',
+            'k': 'C4', 'o': 'C#4', 'l': 'D4', 'p': 'D#4', ';': 'E4', "'": 'F4',
+            'z': 'C2', 'x': 'D2', 'c': 'E2', 'v': 'F2', 'b': 'G2', 'n': 'A2', 'm': 'B2'
+        };
+
+        const SONGS = {
+            'Twinkle Twinkle': ['C4','C4','G4','G4','A4','A4','G4','F4','F4','E4','E4','D4','D4','C4'],
+            'Happy Birthday': ['C4','C4','D4','C4','F4','E4','C4','C4','D4','C4','G4','F4'],
+            'Jingle Bells': ['E4','E4','E4','E4','E4','E4','E4','G4','C4','D4','E4','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],
+            'Mary Had': ['E4','D4','C4','D4','E4','E4','E4','D4','D4','D4','E4','G4','G4','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4']
+        };
+
+        let isRecording = false;
+        let recording = [];
+        let recordingStartTime = 0;
+        let isSustain = false;
+        let activeKeys = new Set();
+        let audioContext = null;
+        let masterGain = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioContext.createGain();
+                masterGain.gain.value = 0.3;
+                masterGain.connect(audioContext.destination);
+            }
         }
+
+        function playNote(frequency, duration = 1) {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            oscillator.type = 'triangle';
+            oscillator.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.01, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.8, audioContext.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            oscillator.connect(gain);
+            gain.connect(masterGain);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration + 0.1);
+            const harmonic = audioContext.createOscillator();
+            const harmonicGain = audioContext.createGain();
+            harmonic.type = 'sine';
+            harmonic.frequency.value = frequency * 2;
+            harmonicGain.gain.value = 0.15;
+            harmonic.connect(harmonicGain);
+            harmonicGain.connect(masterGain);
+            harmonic.start();
+            harmonic.stop(audioContext.currentTime + duration);
+        }
+
+        const piano = document.getElementById('piano');
+        const visualizer = document.getElementById('visualizer');
+
+        function buildPiano() {
+            let whiteKeyIndex = 0;
+            NOTES.forEach((note) => {
+                const isBlack = note.includes('#');
+                const key = document.createElement('div');
+                if (isBlack) {
+                    key.className = 'key black-key';
+                    key.style.left = `${(whiteKeyIndex - 0.5) * (100 / 28)}%`;
+                } else {
+                    key.className = 'key white-key';
+                    whiteKeyIndex++;
+                }
+                key.dataset.note = note;
+                const label = document.createElement('span');
+                label.className = 'key-label';
+                label.textContent = note;
+                key.appendChild(label);
+                key.addEventListener('mousedown', () => pressKey(note, key));
+                key.addEventListener('mouseup', () => releaseKey(key));
+                key.addEventListener('mouseleave', () => releaseKey(key));
+                key.addEventListener('touchstart', (e) => { e.preventDefault(); pressKey(note, key); });
+                key.addEventListener('touchend', (e) => { e.preventDefault(); releaseKey(key); });
+                piano.appendChild(key);
+            });
+        }
+
+        function pressKey(note, keyElement) {
+            if (activeKeys.has(note)) return;
+            activeKeys.add(note);
+            keyElement.classList.add('active');
+            const freq = FREQUENCIES[note];
+            playNote(freq, isSustain ? 3 : 1);
+            if (isRecording) {
+                recording.push({ note: note, time: Date.now() - recordingStartTime });
+            }
+            updateVisualizer(note);
+            updateStatus(`عزف: ${note}`);
+        }
+
+        function releaseKey(keyElement) {
+            const note = keyElement.dataset.note;
+            activeKeys.delete(note);
+            keyElement.classList.remove('active');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const note = KEYBOARD_MAP[e.key.toLowerCase()];
+            if (note) {
+                const keyElement = piano.querySelector(`[data-note="${note}"]`);
+                if (keyElement) pressKey(note, keyElement);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const note = KEYBOARD_MAP[e.key.toLowerCase()];
+            if (note) {
+                const keyElement = piano.querySelector(`[data-note="${note}"]`);
+                if (keyElement) releaseKey(keyElement);
+            }
+        });
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            if (isRecording) {
+                recording = [];
+                recordingStartTime = Date.now();
+                updateStatus('🔴 جاري التسجيل...');
+                document.querySelector('.btn-gold').innerHTML = '⏹ إيقاف التسجيل';
+            } else {
+                updateStatus(`✅ تم تسجيل ${recording.length} نغمة`);
+                document.querySelector('.btn-gold').innerHTML = '🔴 تسجيل';
+            }
+        }
+
+        function playRecording() {
+            if (recording.length === 0) { updateStatus('❌ لا يوجد تسجيل'); return; }
+            updateStatus('▶️ تشغيل التسجيل...');
+            recording.forEach((item) => {
+                setTimeout(() => {
+                    const freq = FREQUENCIES[item.note];
+                    playNote(freq, 0.5);
+                    updateVisualizer(item.note);
+                }, item.time);
+            });
+            setTimeout(() => { updateStatus('✅ انتهى التشغيل'); }, recording[recording.length - 1].time + 1000);
+        }
+
+        function clearRecording() {
+            recording = [];
+            updateStatus('🗑 تم مسح التسجيل');
+        }
+
+        function toggleSustain() {
+            isSustain = !isSustain;
+            updateStatus(isSustain ? '🎵 Sustain مفعل' : '🎵 Sustain معطل');
+        }
+
+        function buildSongSelector() {
+            const songSelector = document.getElementById('songSelector');
+            Object.keys(SONGS).forEach((songName, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'song-btn';
+                btn.textContent = `🎵 ${songName}`;
+                btn.onclick = () => playSong(index);
+                songSelector.appendChild(btn);
+            });
+        }
+
+        function playSong(index) {
+            const song = Object.values(SONGS)[index];
+            const songName = Object.keys(SONGS)[index];
+            updateStatus(`🎵 تشغيل: ${songName}`);
+            song.forEach((note, i) => {
+                setTimeout(() => {
+                    const freq = FREQUENCIES[note];
+                    playNote(freq, 0.4);
+                    updateVisualizer(note);
+                    const keyElement = piano.querySelector(`[data-note="${note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.add('active');
+                        setTimeout(() => keyElement.classList.remove('active'), 300);
+                    }
+                }, i * 400);
+            });
+            setTimeout(() => { updateStatus('✅ انتهت الأغنية'); }, song.length * 400 + 500);
+        }
+
+        function buildVisualizer() {
+            for (let i = 0; i < 40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = '5px';
+                visualizer.appendChild(bar);
+            }
+        }
+
+        function updateVisualizer(note) {
+            const bars = visualizer.querySelectorAll('.bar');
+            const freq = FREQUENCIES[note];
+            const normalized = (freq - 60) / 1000;
+            bars.forEach((bar, index) => {
+                const randomHeight = Math.random() * 45 + 5;
+                const height = normalized * randomHeight;
+                bar.style.height = `${Math.max(3, height)}px`;
+                bar.style.background = index % 2 === 0 ? '#ffd700' : '#00d4ff';
+            });
+        }
+
+        function updateStatus(text) {
+            document.getElementById('status').innerHTML = text;
+        }
+
+        function createSparkles() {
+            const container = document.getElementById('sparkles');
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                sparkle.style.animationDelay = `${Math.random() * 8}s`;
+                sparkle.style.width = `${Math.random() * 3 + 1}px`;
+                sparkle.style.height = sparkle.style.width;
+                container.appendChild(sparkle);
+            }
+        }
+
+        createSparkles();
+        buildPiano();
+        buildVisualizer();
+        buildSongSelector();
+        updateStatus('جاهز للعزف ✨ - اضغط المفاتيح أو استخدم الكيبورد (A-L)');
     </script>
 </body>
 </html>
